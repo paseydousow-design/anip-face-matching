@@ -1,6 +1,9 @@
 # ANIP - Tache 1 : Face Matching / Reconnaissance Faciale
 
-Systeme de reconnaissance faciale developpe dans le cadre du challenge ANIP.  
+> Repo detaille de la Tache 1 — voir le projet complet (3 taches) ici :
+> **[ahmadous/anip-benin-2025-identity-ai](https://github.com/ahmadous/anip-benin-2025-identity-ai)**
+
+Systeme de reconnaissance faciale developpe dans le cadre du **challenge ANIP Benin 2024** (finaliste).
 Objectif : identifier si deux photos representent la meme personne, parmi **~2 millions de paires** d'images.
 
 ---
