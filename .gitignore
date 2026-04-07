@@ -1,0 +1,19 @@
+# Dataset (trop lourd pour GitHub)
+anip-reconnaissance-faciale-estimation-ages-ocr/
+dataset_tache_1/
+*.zip
+
+# Modeles entraines
+*.keras
+*.pt
+*.h5
+*.onnx
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
