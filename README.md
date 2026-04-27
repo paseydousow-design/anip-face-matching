@@ -98,6 +98,12 @@ Elle permet de comparer deux images avec :
 - similarite cosinus
 - seuil ajustable
 
+## GitHub Pages
+
+Une vitrine statique de la tache 1 est publiee via GitHub Pages :
+
+https://paseydousow-design.github.io/anip-face-matching/
+
 ---
 
 ## Resultats

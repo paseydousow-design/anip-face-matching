@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ANIP Face Matching - Tache 1</title>
+  <meta name="description" content="Tache 1 du challenge ANIP Benin 2024 : reconnaissance faciale, FaceNet, TTA et correction du prior.">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --ink: #f8fafc;
+      --muted: #cbd5e1;
+      --line: rgba(255,255,255,.12);
+      --accent: #38bdf8;
+      --accent2: #22c55e;
+      --warn: #f59e0b;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+    }
+
+    a { color: inherit; }
+    .wrap { width: min(1120px, calc(100% - 32px)); margin: 0 auto; }
+
+    header {
+      border-bottom: 1px solid var(--line);
+      background: rgba(15, 23, 42, .92);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+    }
+
+    nav {
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .navlinks {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill, .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 12px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      min-height: 40px;
+    }
+
+    .btn.primary {
+      border-color: transparent;
+      background: var(--accent);
+      color: #082f49;
+    }
+
+    .btn.secondary {
+      background: rgba(255,255,255,.06);
+    }
+
+    .hero {
+      padding: 72px 0 40px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr);
+      gap: 34px;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: clamp(38px, 5vw, 68px);
+      line-height: 1.02;
+      margin: 0 0 20px;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: clamp(24px, 3vw, 36px);
+      line-height: 1.15;
+      margin: 0 0 16px;
+      letter-spacing: 0;
+    }
+
+    h3 { margin: 0 0 8px; }
+    p { color: var(--muted); margin: 0 0 18px; }
+
+    .kicker {
+      color: var(--accent);
+      font-weight: 800;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      font-size: 13px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 26px;
+    }
+
+    .hero-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--panel);
+    }
+
+    .hero-card img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .caption {
+      padding: 12px 14px;
+      color: var(--muted);
+      font-size: 14px;
+      border-top: 1px solid var(--line);
+    }
+
+    section {
+      padding: 54px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      background: rgba(255,255,255,.04);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 28px;
+      line-height: 1;
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+
+    .stat span { color: var(--muted); font-size: 14px; }
+
+    .timeline {
+      display: grid;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 74px 1fr;
+      gap: 14px;
+      align-items: start;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,255,255,.04);
+    }
+
+    .version {
+      color: var(--accent2);
+      font-weight: 900;
+    }
+
+    .visual-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 24px;
+    }
+
+    .visual {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--panel);
+    }
+
+    .visual img {
+      width: 100%;
+      display: block;
+    }
+
+    .note {
+      border-left: 4px solid var(--warn);
+      padding: 14px 16px;
+      background: rgba(245, 158, 11, .08);
+      color: var(--muted);
+      margin-top: 24px;
+    }
+
+    footer {
+      padding: 34px 0;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+    }
+
+    @media (max-width: 860px) {
+      nav { align-items: flex-start; flex-direction: column; padding: 14px 0; }
+      .navlinks { justify-content: flex-start; }
+      .hero { padding-top: 42px; }
+      .hero-grid, .visual-grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 520px) {
+      .stats { grid-template-columns: 1fr; }
+      .step { grid-template-columns: 1fr; }
+      .pill, .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="wrap">
+      <div class="brand">ANIP Face Matching</div>
+      <div class="navlinks">
+        <a class="pill" href="#iterations">Versions</a>
+        <a class="pill" href="#resultats">Resultats</a>
+        <a class="btn secondary" href="https://github.com/paseydousow-design/anip-face-matching">GitHub</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <div class="kicker">Challenge ANIP Benin 2024 - finaliste</div>
+          <h1>Reconnaissance faciale sur environ 2 millions de paires.</h1>
+          <p>
+            Tache 1 : verifier si deux photos representent la meme personne.
+            Le projet documente les iterations V2 a V10, du reseau siamois MobileNetV2
+            jusqu'a FaceNet, TTA, alignement MTCNN et calibration du seuil.
+          </p>
+          <div class="hero-actions">
+            <a class="btn primary" href="https://github.com/paseydousow-design/anip-face-matching">Voir le code</a>
+            <a class="btn secondary" href="https://github.com/ahmadous/anip-benin-2025-identity-ai">Projet complet 3 taches</a>
+          </div>
+        </div>
+        <div class="hero-card">
+          <img src="assets/matches_v9.png" alt="Paires de visages matchees avec scores de similarite">
+          <div class="caption">Exemples de paires retenues par le pipeline V9.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="resultats">
+      <div class="wrap">
+        <h2>Le vrai probleme n'etait pas seulement le modele.</h2>
+        <p>
+          La validation etait equilibree a 50% positif, alors que le test reel etait proche de 0.05%.
+          Un seuil naif donnait beaucoup trop de faux matchs. La V9 corrige ce decalage avec une calibration
+          basee sur le prior attendu.
+        </p>
+        <div class="stats">
+          <div class="stat"><strong>2M</strong><span>paires candidates</span></div>
+          <div class="stat"><strong>0.05%</strong><span>paires positives attendues</span></div>
+          <div class="stat"><strong>0.7575</strong><span>AUC-ROC validation</span></div>
+          <div class="stat"><strong>3 366</strong><span>paires V9 retenues</span></div>
+        </div>
+        <div class="note">
+          Le pipeline deploye dans le repo inclut aussi une app Gradio locale avec MTCNN + FaceNet pour comparer deux images.
+          GitHub Pages sert ici de vitrine statique ; l'inference Python tourne en local ou sur un serveur ML.
+        </div>
+      </div>
+    </section>
+
+    <section id="iterations">
+      <div class="wrap">
+        <h2>Iterations principales</h2>
+        <div class="timeline">
+          <div class="step"><div class="version">V2</div><div><h3>Siamese MobileNetV2</h3><p>Premiere architecture de verification faciale avec TensorFlow.</p></div></div>
+          <div class="step"><div class="version">V4</div><div><h3>Fine-tuning</h3><p>Degelage partiel du backbone et ajustement des couches finales.</p></div></div>
+          <div class="step"><div class="version">V6</div><div><h3>Triplet loss</h3><p>Meilleure separation des embeddings pour rapprocher les memes identites.</p></div></div>
+          <div class="step"><div class="version">V7</div><div><h3>FaceNet VGGFace2</h3><p>Passage a un modele specialise visage avec embeddings 512 dimensions.</p></div></div>
+          <div class="step"><div class="version">V8</div><div><h3>ArcFace + TTA</h3><p>Ensemble et test-time augmentation, mais seuil encore trop permissif.</p></div></div>
+          <div class="step"><div class="version">V9</div><div><h3>Correction du prior</h3><p>Calibration du seuil pour tenir compte du tres fort desequilibre du test.</p></div></div>
+          <div class="step"><div class="version">V10</div><div><h3>MTCNN + FAR</h3><p>Exploration de l'alignement facial et d'une calibration orientee biometrie.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <h2>Visualisations</h2>
+        <div class="visual-grid">
+          <div class="visual">
+            <img src="assets/calibration_v9.png" alt="Courbes de calibration V9">
+            <div class="caption">Calibration V9 : ROC, precision-rappel et distribution des scores.</div>
+          </div>
+          <div class="visual">
+            <img src="assets/diagnostic_v8.png" alt="Diagnostic V8">
+            <div class="caption">Diagnostic V8 : pourquoi le seuil initial retenait trop de paires.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      Papa Ahmadou Seydou Sow - ANIP Identity AI - Tache 1 Face Matching
+    </div>
+  </footer>
+</body>
+</html>
