@@ -1,3 +1,10 @@
+---
+title: ANIP Face Matching
+sdk: gradio
+app_file: app.py
+license: mit
+---
+
 # ANIP - Tache 1 : Face Matching / Reconnaissance Faciale
 
 > Repo detaille de la Tache 1 — voir le projet complet (3 taches) ici :
@@ -76,6 +83,20 @@ Pour ArcFace (optionnel) :
 ```bash
 pip install insightface onnxruntime
 ```
+
+## Demo Gradio
+
+Une demo deployable est disponible dans `app.py`.
+
+```bash
+python app.py
+```
+
+Elle permet de comparer deux images avec :
+- alignement facial MTCNN
+- FaceNet VGGFace2
+- similarite cosinus
+- seuil ajustable
 
 ---
 
