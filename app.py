@@ -1,5 +1,9 @@
 from functools import lru_cache
+import os
 from typing import Any, Dict, Tuple
+
+# Helps local Windows/Anaconda environments that load two OpenMP runtimes.
+os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
 
 import gradio as gr
 import numpy as np
